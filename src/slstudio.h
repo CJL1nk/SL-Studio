@@ -10,11 +10,12 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 typedef struct {
     FILE* file;
-
     float DURATION; // Might make this get auto-set
+
     uint32_t NUM_SAMPLES;
     uint32_t FILE_SIZE;
     uint32_t CHUNK_SIZE;
@@ -30,8 +31,18 @@ typedef struct {
     uint32_t SUBCHUNK2_SIZE;
 } AudioDescriptor;
 
+typedef struct {
+    float note;
+    float duration;
+} Note;
+
+typedef struct {
+    Note* notes;
+} NoteStack;
+
 AudioDescriptor* init_standard_file(const char* filename, float duration);
-void write_note(AudioDescriptor* f, float note, float duration);
+void write_note(const AudioDescriptor* audio, float note, float duration);
+void write_notes(const AudioDescriptor* audio, float duration, int count, ...);
 void write_u16_le(FILE *file, uint16_t value);
 void write_u32_le(FILE *file, uint32_t value);
 void write_string(FILE *file, const char* str);
@@ -159,6 +170,5 @@ void write_string(FILE *file, const char* str);
 #define Gs7 3322.44f
 #define Gs8 6644.88f
 // -------------------------
-
 
 #endif //SL_STUDIO_SLSTUDIO_H

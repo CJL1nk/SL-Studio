@@ -6,12 +6,9 @@
 
 int main() {
 
-    AudioDescriptor* audio = init_standard_file("rard.wav", 2.5f);
+    const AudioDescriptor* audio = init_standard_file("rard.wav", 1.f);
 
-    write_note(audio, G5, 1.f);
-    write_note(audio, E5, 0.5f);
-    write_note(audio, D5, 0.5f);
-    write_note(audio, As4, 0.5f);
+    write_notes(audio, 1.0f, 4, C5, E5, G5, B5);
 
     fclose(audio->file);
 
