@@ -7,7 +7,7 @@
 AudioDescriptor* init_standard_file(const char* filename, const float duration) {
 
     AudioDescriptor* audio = (AudioDescriptor*)malloc(sizeof(AudioDescriptor));
-    audio->file = fopen(filename, "wb");
+    audio->filename = filename;
 
     audio->SUBCHUNK1_SIZE = 16;
     audio->AUDIO_FORMAT = 1;
@@ -24,21 +24,7 @@ AudioDescriptor* init_standard_file(const char* filename, const float duration) 
 
     audio->SUBCHUNK2_SIZE = audio->NUM_SAMPLES * audio->BLOCK_ALIGN;
 
-    const uint32_t SUBCHUNK1_SIZE = 16;
-
-    write_string(audio->file, "RIFF");
-    write_u32_le(audio->file, audio->CHUNK_SIZE);
-    write_string(audio->file, "WAVE");
-    write_string(audio->file, "fmt ");
-    write_u32_le(audio->file, SUBCHUNK1_SIZE);
-    write_u16_le(audio->file, audio->AUDIO_FORMAT);
-    write_u16_le(audio->file, audio->NUM_CHANNELS);
-    write_u32_le(audio->file, audio->SAMPLE_RATE);
-    write_u32_le(audio->file, audio->BYTE_RATE);
-    write_u16_le(audio->file, audio->BLOCK_ALIGN);
-    write_u16_le(audio->file, audio->BITS_PER_SAMPLE);
-    write_string(audio->file, "data");
-    write_u32_le(audio->file, audio->SUBCHUNK2_SIZE);
+    audio->SUBCHUNK1_SIZE = 16;
 
     return audio;
 }
@@ -84,6 +70,35 @@ void write_notes(const AudioDescriptor* audio, const float duration, const int c
     }
 
     free(notes);
+}
+
+int audio_init(AudioDescriptor* audio) {
+
+    audio->file = fopen(audio->filename, "wb");
+
+    write_string(audio->file, "RIFF");
+    write_u32_le(audio->file, audio->CHUNK_SIZE);
+    write_string(audio->file, "WAVE");
+    write_string(audio->file, "fmt ");
+    write_u32_le(audio->file, audio->SUBCHUNK1_SIZE);
+    write_u16_le(audio->file, audio->AUDIO_FORMAT);
+    write_u16_le(audio->file, audio->NUM_CHANNELS);
+    write_u32_le(audio->file, audio->SAMPLE_RATE);
+    write_u32_le(audio->file, audio->BYTE_RATE);
+    write_u16_le(audio->file, audio->BLOCK_ALIGN);
+    write_u16_le(audio->file, audio->BITS_PER_SAMPLE);
+    write_string(audio->file, "data");
+    write_u32_le(audio->file, audio->SUBCHUNK2_SIZE);
+
+    if (!audio->file) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int audio_deinit(const AudioDescriptor* audio) {
+    return fclose(audio->file);
 }
 
 void write_u16_le(FILE* file, const uint16_t value) {

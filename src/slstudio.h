@@ -14,6 +14,7 @@
 
 typedef struct {
     FILE* file;
+    const char* filename;
     float DURATION; // Might make this get auto-set
 
     uint32_t NUM_SAMPLES;
@@ -43,10 +44,13 @@ typedef struct {
 AudioDescriptor* init_standard_file(const char* filename, float duration);
 void write_note(const AudioDescriptor* audio, float note, float duration);
 void write_notes(const AudioDescriptor* audio, float duration, int count, ...);
+int audio_init(AudioDescriptor* audio);
+int audio_deinit(const AudioDescriptor* audio);
 void write_u16_le(FILE *file, uint16_t value);
 void write_u32_le(FILE *file, uint32_t value);
 void write_string(FILE *file, const char* str);
 
+// This is the best code ever written. There is no question.
 // --- NOTES DECLARATION ---
 #define SILENCE 0.0f
 
