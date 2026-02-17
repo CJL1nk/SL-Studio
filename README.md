@@ -6,6 +6,7 @@ Code your own music
 ## Todo:
 
 - Implement ability to write notes at specific timestamps
-- Implement ability to stack multiple notes at once
+- Implement better note-stacking abilities
 - Add different instruments/pedals
-- Support more file formats
+- MIDI import support
+- Support more file format exports
