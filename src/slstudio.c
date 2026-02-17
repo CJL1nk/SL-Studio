@@ -72,6 +72,14 @@ void write_notes(const AudioDescriptor* audio, const float duration, const int c
     free(notes);
 }
 
+void write_note_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const float note) {
+
+}
+
+void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const int count, ...) {
+
+}
+
 int audio_init(AudioDescriptor* audio) {
 
     audio->file = fopen(audio->filename, "wb");

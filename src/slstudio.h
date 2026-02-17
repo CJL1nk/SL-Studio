@@ -41,13 +41,83 @@ typedef struct {
     Note* notes;
 } NoteStack;
 
+/**
+ * Initializes a standard, 44100hz, single channel WAV file header
+ * @param filename Desired filename of song (abc.wav)
+ * @param duration Duration of desired song
+ * @return AudioDescriptor object to create file
+ */
 AudioDescriptor* init_standard_file(const char* filename, float duration);
+
+/**
+ * Places a note at the end of a song
+ * @param audio AudioDescriptor object to write into
+ * @param duration Duration, in seconds, of note
+ * @param note Frequency of note (macros defined for all notes octaves 0-8)
+ */
 void write_note(const AudioDescriptor* audio, float duration, float note);
+
+/**
+ * Places multiple notes on top of each other, at the end of a song
+ * @param audio AudioDescriptor object to write into
+ * @param duration Duration of *all* notes
+ * @param count Number of notes to write
+ * @param ... Frequencies of notes (macros defined for all notes octaves 0-8)
+ */
 void write_notes(const AudioDescriptor* audio, float duration, int count, ...);
+
+/**
+ * Places a note at a specific timestamp of your song
+ * @param audio AudioDescriptor object to write into
+ * @param timestamp Timestamp (in seconds) to place note at
+ * @param duration Duration, in seconds, of note
+ * @param note Frequency of note (macros defined for all notes octaves 0-8)
+ */
+void write_note_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const float note);
+
+/**
+ * Places multiple notes on top of each other, at a specific timestamp of your song
+ * @param audio AudioDescriptor object to write into
+ * @param timestamp Timestamp (in seconds) to places notes at
+ * @param duration Duration of *all* notes
+ * @param count Number of notes to write
+ * @param ... Frequencies of notes (macros defined for all notes octaves 0-8)
+ */
+void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const int count, ...);
+
+/**
+ * Initializes AudioDescriptor object for writing
+ * @param audio AudioDescriptor object to initialize for writing
+ * @return 0 on success
+ */
 int audio_init(AudioDescriptor* audio);
+
+/**
+ * De-initializes audio files for safe closing
+ * @param audio AudioDescriptor object to de-initialize
+ * @return 0 on success
+ */
 int audio_deinit(const AudioDescriptor* audio);
-void write_u16_le(FILE *file, uint16_t value);
+
+/**
+ * Writes a 16-bit unsigned integer to a file, in little endian byte order
+ * @param file File to write into
+ * @param value Integer to write
+ */
+inline void write_u16_le(FILE *file, uint16_t value);
+
+/**
+ * Writes a 32-bit unsigned integer to a file, in little endian byte order
+ * @param file File to write into
+ * @param value Integer to write
+ */
 void write_u32_le(FILE *file, uint32_t value);
+
+/**
+ * Writes string binary to file
+ * @param file File to write into
+ * @param str String to write
+ */
 void write_string(FILE *file, const char* str);
 
 // This is the best code ever written. There is no question.
