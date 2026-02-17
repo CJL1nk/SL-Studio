@@ -10,14 +10,14 @@ int main() {
     audio_init(audio);
 
     write_notes(audio, 0.5f, 2, A5, E5);
-    write_note(audio, A4, 0.5f);
-    write_note(audio, E5, 0.5f);
-    write_note(audio, A4, 0.5f);
+    write_note(audio, 0.5f, A4);
+    write_note(audio, 0.5f, E5);
+    write_note(audio, 0.5f, A4);
 
     write_notes(audio, 0.5f, 2, A5, E5);
-    write_note(audio, A4, 0.5f);
-    write_note(audio, E5, 0.5f);
-    write_note(audio, D5, 0.5f);
+    write_note(audio, 0.5f, A4);
+    write_note(audio, 0.5f, E5);
+    write_note(audio, 0.5f, D5);
 
     audio_deinit(audio);
 

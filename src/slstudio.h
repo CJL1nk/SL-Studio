@@ -42,7 +42,7 @@ typedef struct {
 } NoteStack;
 
 AudioDescriptor* init_standard_file(const char* filename, float duration);
-void write_note(const AudioDescriptor* audio, float note, float duration);
+void write_note(const AudioDescriptor* audio, float duration, float note);
 void write_notes(const AudioDescriptor* audio, float duration, int count, ...);
 int audio_init(AudioDescriptor* audio);
 int audio_deinit(const AudioDescriptor* audio);

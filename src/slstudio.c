@@ -29,7 +29,7 @@ AudioDescriptor* init_standard_file(const char* filename, const float duration) 
     return audio;
 }
 
-void write_note(const AudioDescriptor* audio, const float note, const float duration) {
+void write_note(const AudioDescriptor* audio, const float duration, const float note) {
 
     // Write note samples to file
     for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
