@@ -11,7 +11,8 @@ int main() {
 
     write_note(audio, 4.f, A5);
 
-    write_note_ts(audio, 1.f, 2.f, E5);
+    write_note_ts(audio, 1.f, 1.f, E5);
+    write_notes_ts(audio, 2.f, 1.f, 2, B5, G5);
 
     audio_deinit(audio);
 

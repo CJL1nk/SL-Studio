@@ -82,32 +82,50 @@ void write_note_ts(const AudioDescriptor* audio, const float timestamp, const fl
 
     for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
 
-        int16_t sample;
-        if (fread(&sample, sizeof sample, 1, audio->file) != 1) {
-            sample = 0;
-        }
-
-        float amplitude = sample / 32768.0f;
-
         const float time = (float)i / (float)audio->SAMPLE_RATE;
-        amplitude += 0.15f * sinf(time * note);
-        sample = (int16_t)(amplitude * 32767);
+        const float amplitude = 0.15f * sinf(time * note * 2.0f * M_PI);
+        const uint16_t sample = (int16_t)(amplitude * 32767);
 
         write_u16_le(audio->file, sample); // BUG HERE
     }
-
-    // Seek to timestamp within file (44 + (sizeof(uint16_t) * (timestamp * audio->SAMPLE_RATE))
-
-    // Get value at current spot, calculate amplitude, add TO value at current spot
 }
 
 void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const int count, ...) {
 
+    fseek(audio->file, (44 + (sizeof(uint16_t) * (timestamp * audio->SAMPLE_RATE))), SEEK_SET);
+
+    va_list args;
+    va_start(args, count);
+    float* notes = malloc(count * sizeof(float));
+
+    // Get all args from variable arg list, load into notes array cuz for some reason va_arg() consumes the object
+    for (int i = 0; i < count; i++) {
+        notes[i] = va_arg(args, double);
+    }
+
+    va_end(args);
+
+    // Write note samples to file
+    for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
+
+        float amplitude = 0.0f;
+        const float time = (float)i / (float)audio->SAMPLE_RATE; // Quantum of time sample represents
+
+        for (int j = 0; j < count; j++) {
+            amplitude += 0.15f * sinf(time * notes[j] * 2.0f * M_PI);
+        }
+
+        const int16_t sample = (int16_t)(amplitude * 32767);
+
+        write_u16_le(audio->file, sample);
+    }
+
+    free(notes);
 }
 
 int audio_init(AudioDescriptor* audio) {
 
-    audio->file = fopen(audio->filename, "ab");
+    audio->file = fopen(audio->filename, "wb");
 
     write_string(audio->file, "RIFF");
     write_u32_le(audio->file, audio->CHUNK_SIZE);
