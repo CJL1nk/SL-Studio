@@ -31,6 +31,8 @@ AudioDescriptor* init_standard_file(const char* filename, const float duration) 
 
 void write_note(const AudioDescriptor* audio, const float duration, const float note) {
 
+    fseek(audio->file, 0, SEEK_END); // Go to end so stuff doesn't get overwritten
+
     // Write note samples to file
     for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
         const float time = (float)i / (float)audio->SAMPLE_RATE; // Quantum of time sample represents
@@ -42,6 +44,8 @@ void write_note(const AudioDescriptor* audio, const float duration, const float 
 }
 
 void write_notes(const AudioDescriptor* audio, const float duration, const int count, ...) {
+
+    fseek(audio->file, 0, SEEK_END); // Go to end so stuff doesn't get overwritten
 
     va_list args;
     va_start(args, count);
@@ -74,6 +78,27 @@ void write_notes(const AudioDescriptor* audio, const float duration, const int c
 
 void write_note_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const float note) {
 
+    fseek(audio->file, (44 + (sizeof(uint16_t) * (timestamp * audio->SAMPLE_RATE))), SEEK_SET);
+
+    for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
+
+        int16_t sample;
+        if (fread(&sample, sizeof sample, 1, audio->file) != 1) {
+            sample = 0;
+        }
+
+        float amplitude = sample / 32768.0f;
+
+        const float time = (float)i / (float)audio->SAMPLE_RATE;
+        amplitude += 0.15f * sinf(time * note);
+        sample = (int16_t)(amplitude * 32767);
+
+        write_u16_le(audio->file, sample); // BUG HERE
+    }
+
+    // Seek to timestamp within file (44 + (sizeof(uint16_t) * (timestamp * audio->SAMPLE_RATE))
+
+    // Get value at current spot, calculate amplitude, add TO value at current spot
 }
 
 void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const int count, ...) {
@@ -82,7 +107,7 @@ void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const f
 
 int audio_init(AudioDescriptor* audio) {
 
-    audio->file = fopen(audio->filename, "wb");
+    audio->file = fopen(audio->filename, "ab");
 
     write_string(audio->file, "RIFF");
     write_u32_le(audio->file, audio->CHUNK_SIZE);

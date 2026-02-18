@@ -73,7 +73,7 @@ void write_notes(const AudioDescriptor* audio, float duration, int count, ...);
  * @param duration Duration, in seconds, of note
  * @param note Frequency of note (macros defined for all notes octaves 0-8)
  */
-void write_note_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const float note);
+void write_note_ts(const AudioDescriptor* audio, float timestamp, float duration, float note);
 
 /**
  * Places multiple notes on top of each other, at a specific timestamp of your song
@@ -83,7 +83,7 @@ void write_note_ts(const AudioDescriptor* audio, const float timestamp, const fl
  * @param count Number of notes to write
  * @param ... Frequencies of notes (macros defined for all notes octaves 0-8)
  */
-void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const int count, ...);
+void write_notes_ts(const AudioDescriptor* audio, float timestamp, float duration, int count, ...);
 
 /**
  * Initializes AudioDescriptor object for writing
