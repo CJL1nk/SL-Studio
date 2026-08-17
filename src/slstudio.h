@@ -7,10 +7,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdarg.h>
+
+#define A4_FREQUENCY 440.0f
 
 typedef struct {
     FILE* file;
@@ -41,6 +39,13 @@ typedef struct {
     Note* notes;
 } NoteStack;
 
+typedef enum {
+    SYNTH_SINE,
+    SYNTH_SQUARE,
+    SYNTH_HARMONIC,
+    GRAND_PIANO
+} Instrument;
+
 /**
  * Initializes a standard, 44100hz, single channel WAV file header
  * @param filename Desired filename of song (abc.wav)
@@ -49,41 +54,65 @@ typedef struct {
  */
 AudioDescriptor* init_standard_file(const char* filename, float duration);
 
+float calculate_sample(float note, float time, Instrument instrument);
+
+/**
+ * Returns a sample for a standard sine wave synth
+ * @param note Frequency of note (macros defined for all notes octaves 0-8)
+ * @param time
+ * @return Sample for a standard sine wave synth
+ */
+float synth_standard(float note, float time);
+
+/**
+ * Returns a sample for a standard square wave synth
+ * @param note Frequency of note (macros defined for all notes octaves 0-8)
+ * @param time tihng
+ * @return Sample for a standard square wave synth
+ */
+float synth_square(float note, float time);
+
+float synth_harmonic(float note, float time);
+
 /**
  * Places a note at the end of a song
  * @param audio AudioDescriptor object to write into
+ * @param instrument
  * @param duration Duration, in seconds, of note
  * @param note Frequency of note (macros defined for all notes octaves 0-8)
  */
-void write_note(const AudioDescriptor* audio, float duration, float note);
+void write_note(const AudioDescriptor* audio, Instrument instrument, float duration, float note);
 
 /**
  * Places multiple notes on top of each other, at the end of a song
  * @param audio AudioDescriptor object to write into
+ * @param instrument
  * @param duration Duration of *all* notes
  * @param count Number of notes to write
  * @param ... Frequencies of notes (macros defined for all notes octaves 0-8)
  */
-void write_notes(const AudioDescriptor* audio, float duration, int count, ...);
+void write_notes(const AudioDescriptor* audio, Instrument instrument, float duration, int count, ...);
 
 /**
  * Places a note at a specific timestamp of your song
  * @param audio AudioDescriptor object to write into
+ * @param instrument
  * @param timestamp Timestamp (in seconds) to place note at
  * @param duration Duration, in seconds, of note
  * @param note Frequency of note (macros defined for all notes octaves 0-8)
  */
-void write_note_ts(const AudioDescriptor* audio, float timestamp, float duration, float note);
+void write_note_ts(const AudioDescriptor* audio, Instrument instrument, float timestamp, float duration, float note);
 
 /**
  * Places multiple notes on top of each other, at a specific timestamp of your song
  * @param audio AudioDescriptor object to write into
+ * @param instrument
  * @param timestamp Timestamp (in seconds) to places notes at
  * @param duration Duration of *all* notes
  * @param count Number of notes to write
  * @param ... Frequencies of notes (macros defined for all notes octaves 0-8)
  */
-void write_notes_ts(const AudioDescriptor* audio, float timestamp, float duration, int count, ...);
+void write_notes_ts(const AudioDescriptor* audio, Instrument instrument, float timestamp, float duration, int count, ...);
 
 /**
  * Initializes AudioDescriptor object for writing
@@ -122,127 +151,125 @@ void write_string(FILE *file, const char* str);
 
 // This is the best code ever written. There is no question.
 // --- NOTES DECLARATION ---
+float note_semitone(int semitones);
 #define SILENCE 0.0f
 
-#define A0 27.50f
-#define A1 55.0f
-#define A2 110.0f
-#define A3 220.0f
-#define A4 440.0f
-#define A5 880.0f
-#define A6 1760.0f
-#define A7 3520.0f
-#define A8 7040.0f
+#define C0 note_semitone(-57)
+#define Cs0 note_semitone(-56)
+#define D0 note_semitone(-55)
+#define Ds0 note_semitone(-54)
+#define E0 note_semitone(-53)
+#define F0 note_semitone(-52)
+#define Fs0 note_semitone(-51)
+#define G0 note_semitone(-50)
+#define Gs0 note_semitone(-49)
+#define A0 note_semitone(-48)
+#define As0 note_semitone(-47)
+#define B0 note_semitone(-46)
 
-#define As0 29.14f
-#define As1 58.27f
-#define As2 116.54f
-#define As3 233.08f
-#define As4 466.16f
-#define As5 932.33f
-#define As6 1864.66f
-#define As7 3729.31f
-#define As8 7458.62f
+#define C1 note_semitone(-45)
+#define Cs1 note_semitone(-44)
+#define D1 note_semitone(-43)
+#define Ds1 note_semitone(-42)
+#define E1 note_semitone(-41)
+#define F1 note_semitone(-40)
+#define Fs1 note_semitone(-39)
+#define G1 note_semitone(-38)
+#define Gs1 note_semitone(-37)
+#define A1 note_semitone(-36)
+#define As1 note_semitone(-35)
+#define B1 note_semitone(-34)
 
-#define B0 30.87f
-#define B1 61.74f
-#define B2 123.47f
-#define B3 246.94f
-#define B4 493.88f
-#define B5 987.77f
-#define B6 1975.53f
-#define B7 3951.07f
-#define B8 7902.13f
+#define C2 note_semitone(-33)
+#define Cs2 note_semitone(-32)
+#define D2 note_semitone(-31)
+#define Ds2 note_semitone(-30)
+#define E2 note_semitone(-29)
+#define F2 note_semitone(-28)
+#define Fs2 note_semitone(-27)
+#define G2 note_semitone(-26)
+#define Gs2 note_semitone(-25)
+#define A2 note_semitone(-24)
+#define As2 note_semitone(-23)
+#define B2 note_semitone(-22)
 
-#define C0 16.35f
-#define C1 32.70f
-#define C2 65.41f
-#define C3 130.81f
-#define C4 261.63f
-#define C5 523.25f
-#define C6 1046.50f
-#define C7 2093.0f
-#define C8 4186.01f
+#define C3 note_semitone(-21)
+#define Cs3 note_semitone(-20)
+#define D3 note_semitone(-19)
+#define Ds3 note_semitone(-18)
+#define E3 note_semitone(-17)
+#define F3 note_semitone(-16)
+#define Fs3 note_semitone(-15)
+#define G3 note_semitone(-14)
+#define Gs3 note_semitone(-13)
+#define A3 note_semitone(-12)
+#define As3 note_semitone(-11)
+#define B3 note_semitone(-10)
 
-#define Cs0 17.32f
-#define Cs1 34.65f
-#define Cs2 69.30f
-#define Cs3 138.59f
-#define Cs4 277.18f
-#define Cs5 554.37f
-#define Cs6 1108.73f
-#define Cs7 2217.46f
-#define Cs8 4434.92f
+#define C4 note_semitone(-9)
+#define Cs4 note_semitone(-8)
+#define D4 note_semitone(-7)
+#define Ds4 note_semitone(-6)
+#define E4 note_semitone(-5)
+#define F4 note_semitone(-4)
+#define Fs4 note_semitone(-3)
+#define G4 note_semitone(-2)
+#define Gs4 note_semitone(-1)
+#define A4 A4_FREQUENCY
+#define As4 note_semitone(1)
+#define B4 note_semitone(2)
 
-#define D0 18.35f
-#define D1 36.71f
-#define D2 73.42f
-#define D3 146.83f
-#define D4 293.66f
-#define D5 587.33f
-#define D6 1174.66f
-#define D7 2349.32f
-#define D8 4698.63f
+#define C5 note_semitone(3)
+#define Cs5 note_semitone(4)
+#define D5 note_semitone(5)
+#define Ds5 note_semitone(6)
+#define E5 note_semitone(7)
+#define F5 note_semitone(8)
+#define Fs5 note_semitone(9)
+#define G5 note_semitone(10)
+#define Gs5 note_semitone(11)
+#define A5 note_semitone(12)
+#define As5 note_semitone(13)
+#define B5 note_semitone(14)
 
-#define Ds0 19.45f
-#define Ds1 38.89f
-#define Ds2 77.78f
-#define Ds3 155.56f
-#define Ds4 311.13f
-#define Ds5 622.25f
-#define Ds6 1244.51f
-#define Ds7 2489.02f
-#define Ds8 4978.03f
+#define C6 note_semitone(15)
+#define Cs6 note_semitone(16)
+#define D6 note_semitone(17)
+#define Ds6 note_semitone(18)
+#define E6 note_semitone(19)
+#define F6 note_semitone(20)
+#define Fs6 note_semitone(21)
+#define G6 note_semitone(22)
+#define Gs6 note_semitone(23)
+#define A6 note_semitone(24)
+#define As6 note_semitone(25)
+#define B6 note_semitone(26)
 
-#define E0 20.60f
-#define E1 41.20f
-#define E2 82.41f
-#define E3 164.81f
-#define E4 329.63f
-#define E5 659.25f
-#define E6 1318.51f
-#define E7 2637.02f
-#define E8 5274.04f
+#define C7 note_semitone(27)
+#define Cs7 note_semitone(28)
+#define D7 note_semitone(29)
+#define Ds7 note_semitone(30)
+#define E7 note_semitone(31)
+#define F7 note_semitone(32)
+#define Fs7 note_semitone(33)
+#define G7 note_semitone(34)
+#define Gs7 note_semitone(35)
+#define A7 note_semitone(36)
+#define As7 note_semitone(37)
+#define B7 note_semitone(38)
 
-#define F0 21.83f
-#define F1 43.65f
-#define F2 87.31f
-#define F3 174.61f
-#define F4 349.23f
-#define F5 698.46f
-#define F6 1396.91f
-#define F7 2793.83f
-#define F8 5587.65f
-
-#define Fs0 23.12f
-#define Fs1 46.25f
-#define Fs2 92.50f
-#define Fs3 185f
-#define Fs4 369.99f
-#define Fs5 739.99f
-#define Fs6 1479.98f
-#define Fs7 2959.96f
-#define Fs8 5919.91f
-
-#define G0 24.50f
-#define G1 49.0f
-#define G2 98.0f
-#define G3 196.0f
-#define G4 392.0f
-#define G5 783.99f
-#define G6 1567.98f
-#define G7 3135.96f
-#define G8 6271.93f
-
-#define Gs0 25.96f
-#define Gs1 51.91f
-#define Gs2 103.83f
-#define Gs3 207.65f
-#define Gs4 415.30f
-#define Gs5 830.61f
-#define Gs6 1661.22f
-#define Gs7 3322.44f
-#define Gs8 6644.88f
+#define C8 note_semitone(39)
+#define Cs8 note_semitone(40)
+#define D8 note_semitone(41)
+#define Ds8 note_semitone(42)
+#define E8 note_semitone(43)
+#define F8 note_semitone(44)
+#define Fs8 note_semitone(45)
+#define G8 note_semitone(46)
+#define Gs8 note_semitone(47)
+#define A8 note_semitone(48)
+#define As8 note_semitone(49)
+#define B8 note_semitone(50)
 // -------------------------
 
 #endif //SL_STUDIO_SLSTUDIO_H

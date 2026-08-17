@@ -4,6 +4,11 @@
 
 #include "slstudio.h"
 
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
 AudioDescriptor* init_standard_file(const char* filename, const float duration) {
 
     AudioDescriptor* audio = (AudioDescriptor*)malloc(sizeof(AudioDescriptor));
@@ -29,21 +34,60 @@ AudioDescriptor* init_standard_file(const char* filename, const float duration) 
     return audio;
 }
 
-void write_note(const AudioDescriptor* audio, const float duration, const float note) {
+float calculate_amplitude(const Instrument instrument, const float note, const float time) {
+
+    float sample = 0;
+
+    switch (instrument) {
+        case SYNTH_SINE:
+            sample = synth_standard(note, time);
+            break;
+        case SYNTH_SQUARE:
+            sample = synth_square(note, time);
+            break;
+        case SYNTH_HARMONIC:
+            sample = synth_harmonic(note, time);
+            break;
+        default:
+            break;
+    }
+
+    return sample;
+}
+
+float synth_standard(const float note, const float time) {
+    return 0.15f * sinf(time * note * 2.0f * M_PI);
+}
+
+float synth_square(const float note, const float time) {
+    const float period = 1.0f / note;
+    const float phase = fmodf(time, period) / period;
+    return (phase < 0.5f) ? 0.10f : -0.10f;
+}
+
+float synth_harmonic(float note, float time) {
+    return
+        (1.00f * sinf(2 * M_PI * note * time) +
+        0.50f * sinf(2 * M_PI * note * 2 * time) +
+        0.30f * sinf(2 * M_PI * note * 3 * time) +
+        0.15f * sinf(2 * M_PI * note * 4 * time)) / 10;
+}
+
+void write_note(const AudioDescriptor* audio, const Instrument instrument, const float duration, const float note) {
 
     fseek(audio->file, 0, SEEK_END); // Go to end so stuff doesn't get overwritten
 
     // Write note samples to file
     for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
         const float time = (float)i / (float)audio->SAMPLE_RATE; // Quantum of time sample represents
-        const float amplitude = 0.15f * sinf(time * note * 2.0f * M_PI);
-        const int16_t sample = (int16_t)(amplitude * 32767);
+        const float amplitude = calculate_amplitude(instrument, note, time);
+        const uint16_t sample = (int16_t)(amplitude * 32767);
 
         write_u16_le(audio->file, sample);
     }
 }
 
-void write_notes(const AudioDescriptor* audio, const float duration, const int count, ...) {
+void write_notes(const AudioDescriptor* audio, const Instrument instrument, const float duration, const int count, ...) {
 
     fseek(audio->file, 0, SEEK_END); // Go to end so stuff doesn't get overwritten
 
@@ -65,7 +109,7 @@ void write_notes(const AudioDescriptor* audio, const float duration, const int c
         const float time = (float)i / (float)audio->SAMPLE_RATE; // Quantum of time sample represents
 
         for (int j = 0; j < count; j++) {
-            amplitude += 0.15f * sinf(time * notes[j] * 2.0f * M_PI);
+            amplitude += calculate_amplitude(instrument, notes[j], time);
         }
 
         const int16_t sample = (int16_t)(amplitude * 32767);
@@ -76,21 +120,21 @@ void write_notes(const AudioDescriptor* audio, const float duration, const int c
     free(notes);
 }
 
-void write_note_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const float note) {
+void write_note_ts(const AudioDescriptor* audio, const Instrument instrument, const float timestamp, const float duration, const float note) {
 
     fseek(audio->file, (44 + (sizeof(uint16_t) * (timestamp * audio->SAMPLE_RATE))), SEEK_SET);
 
     for (int i = 0; i < duration * (float)audio->SAMPLE_RATE; i++) {
 
         const float time = (float)i / (float)audio->SAMPLE_RATE;
-        const float amplitude = 0.15f * sinf(time * note * 2.0f * M_PI);
+        const float amplitude = calculate_amplitude(instrument, note, time);
         const uint16_t sample = (int16_t)(amplitude * 32767);
 
         write_u16_le(audio->file, sample); // BUG HERE
     }
 }
 
-void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const float duration, const int count, ...) {
+void write_notes_ts(const AudioDescriptor* audio, const Instrument instrument, const float timestamp, const float duration, const int count, ...) {
 
     fseek(audio->file, (44 + (sizeof(uint16_t) * (timestamp * audio->SAMPLE_RATE))), SEEK_SET);
 
@@ -112,7 +156,7 @@ void write_notes_ts(const AudioDescriptor* audio, const float timestamp, const f
         const float time = (float)i / (float)audio->SAMPLE_RATE; // Quantum of time sample represents
 
         for (int j = 0; j < count; j++) {
-            amplitude += 0.15f * sinf(time * notes[j] * 2.0f * M_PI);
+            amplitude += calculate_amplitude(instrument, notes[j], time);
         }
 
         const int16_t sample = (int16_t)(amplitude * 32767);
@@ -166,4 +210,8 @@ void write_u32_le(FILE* file, const uint32_t value) {
 
 void write_string(FILE *file, const char* str) {
     fwrite(str, 1, strlen(str), file);
+}
+
+float note_semitone(const int semitones) {
+    return A4_FREQUENCY * powf(2.0f, semitones / 12.0f);
 }
