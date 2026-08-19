@@ -31,6 +31,8 @@ int main() {
         write_note(audio, SYNTH_HARMONIC,0.1f, D5);
     }
 
+    write_note_ts(audio, SYNTH_HARMONIC, 4.8f, 8.f, D3);
+
     audio_deinit(audio);
 
     return 0;

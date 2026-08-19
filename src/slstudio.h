@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define HEADER_SIZE 44
+
 #define A4_FREQUENCY 440.0f
 
 typedef struct {
