@@ -29,6 +29,7 @@ mysong.save();
 After compiling, our song will be saved into the directory we ran the program from. If you take a listen, you should hear your note. This note will probably sound pretty bland, which is expected because it's a basic sine synth, which is nothing but a sine wave. Luckily, there's a few more instruments we can check out here. Currently, there are:
 - SineSynth
 - SquareSynth
+- SawSynth
 - HarmonicSynth
 
 To use them, simply replace 'SineSynth' with the name of another instrument.
@@ -39,10 +40,15 @@ mysong.append_note(HarmonicSynth(D5, 4.f));
 
 You may have already wondered "what happens if I want to place a note at a specific timestamp?" It just so happens that there's a function for that as well.
 ```c++
-mysong.add_note(SineSynth(Gs4, 2.5f), 10.f);
+mysong.add_note(SawSynth(Gs4, 2.5f), 10.f);
 ```
 
 The add_note() function takes two arguments: the note, and the timestamp. The note will be placed at the specified timestamp in your song, stacking the note on top of any other note(s) there. This is one method to create a chord, however, not the preferred method.
+
+Lastly, you can control the volume of any single note by passing a 3rd argument into its constructor.
+```c++
+mysong.append_note(SawSynth(Gs4, 2.5f, 0.5f)); // 0.5 volume, default value is 1.0
+```
 
 ### Chords
 
@@ -58,10 +64,10 @@ This makes a 4 second long F major chord with the F, A, and C notes. Chords can 
 
 Similarly to notes, chords can also be placed at a specific timestamp.
 ```c++
-audio.add_chord(Chord({
-        new SquareSynth(F3, 1.f),
-        new SquareSynth(A4, 2.f),
-        new SquareSynth(C4, 4.f)
+mysong.add_chord(Chord({
+        new HarmonicSynth(F3, 1.f),
+        new HarmonicSynth(A4, 2.f),
+        new HarmonicSynth(C4, 4.f)
     }), 3.5f);
 ```
 This will place a chord 3.5 seconds into the song.

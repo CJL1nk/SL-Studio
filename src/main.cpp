@@ -30,15 +30,75 @@ int main() {
         audio.append_note(HarmonicSynth(D5, 0.1f));
     }
 
-    audio.append_note(HarmonicSynth(D4, 8.f));
+
+    audio.add_note(SquareSynth(C3, 0.4f, 0.5), 12.8);
 
     audio.add_chord(Chord({
-        new SquareSynth(F3, 1.f),
-        new SquareSynth(A4, 2.f),
-        new SquareSynth(C4, 4.f)
+        new SawSynth(F5, 0.4f),
+        new SawSynth(C4, 0.4f),
+    }), 13.2f);
+
+    audio.add_note(SquareSynth(As3, 0.4f, 0.5), 13.6);
+
+    audio.add_chord(Chord({
+        new SawSynth(F5, 0.4f),
+        new SawSynth(C4, 0.4f),
+    }), 14.f);
+
+    audio.add_note(SquareSynth(As3, 0.4f, 0.5), 14.4);
+
+    audio.add_chord(Chord({
+        new SawSynth(G5, 0.4f),
+        new SawSynth(D4, 0.4f),
     }), 14.8f);
 
-    audio.add_note(HarmonicSynth(E5, 3.f), 1.f);
+
+    audio.add_chord(Chord({
+        new SawSynth(G5, 0.2f),
+        new SawSynth(D4, 0.2f),
+    }), 16.f);
+    audio.append_note(SawSynth(F5, 0.2f));
+    audio.append_note(SawSynth(F5, 0.2f));
+    audio.append_note(SawSynth(D5, 0.2f));
+    audio.append_note(SawSynth(E5, 0.2f));
+    audio.append_note(SawSynth(F5, 0.2f));
+    audio.append_note(SawSynth(D5, 0.2f));
+    audio.append_note(SawSynth(E5, 0.2f));
+    audio.append_note(SawSynth(F5, 0.2f));
+    audio.append_note(SawSynth(D5, 0.2f));
+
+
+    audio.append_chord(Chord({
+        new SawSynth(A5, 0.4f),
+        new SawSynth(F5, 0.4f),
+        new SawSynth(A4, 0.4f),
+    }));
+
+    audio.append_chord(Chord({
+        new SawSynth(C6, 0.4f),
+        new SawSynth(G5, 0.4f),
+        new SawSynth(C5, 0.4f),
+    }));
+
+    audio.append_chord(Chord({
+        new SawSynth(D6, 0.4f),
+        new SawSynth(A5, 0.4f),
+        new SawSynth(D5, 0.4f),
+    }));
+
+    audio.append_chord(Chord({
+        new SawSynth(E6, 0.4f),
+        new SawSynth(A5, 0.4f),
+        new SawSynth(E5, 0.4f),
+    }));
+
+    audio.append_chord(Chord({
+        new SawSynth(F6, 1.2f),
+        new SawSynth(As5, 1.2f),
+        new SawSynth(F5, 1.2f),
+    }));
+
+    audio.add_note(SquareSynth(D3, 6.f, 0.5f), 17.8);
 
     audio.save();
 

@@ -51,6 +51,12 @@ class SquareSynth final : public Note {
         [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
 };
 
+class SawSynth final : public Note {
+    public:
+        SawSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
+        [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
+};
+
 class HarmonicSynth final : public Note {
     public:
         HarmonicSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};

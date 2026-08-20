@@ -21,6 +21,12 @@ float SquareSynth::calculate_amplitude(const float note_freq, const float time) 
     return (phase < 0.5f) ? volume : -volume;
 }
 
+float SawSynth::calculate_amplitude(const float note_freq, const float time) const {
+    const float period = 1.0f / note_freq;
+    const float phase = fmodf(time, period) / period;  // 0 to 1 over one period
+    return (0.08f * this->volume) * (2.0f * phase - 1.0f);  // -1 to +1
+}
+
 float HarmonicSynth::calculate_amplitude(const float note_freq, const float time) const {
     return
         ((1.00f * this->volume) * sinf(2.0f * M_PI * note_freq * time) +
@@ -119,7 +125,9 @@ void Audio::add_chord(const Chord& chord, const float timestamp) {
     const size_t start_index = timestamp * (float)this->SAMPLE_RATE;
     const size_t num_samples = (size_t)(longest_note * (float)this->SAMPLE_RATE);
 
-    this->amplitudes.resize(start_index + num_samples);
+    if (start_index + num_samples > this->amplitudes.size()) {
+        this->amplitudes.resize(start_index + num_samples);
+    }
 
     for (int i = 0; i < chord.notes.size(); i++) {
 
@@ -170,7 +178,6 @@ bool Audio::save() {
 
     return true;
 }
-
 
 
 // ----- MACROS AND OTHER --------------------------------------------------------------------------------
