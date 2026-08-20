@@ -50,6 +50,14 @@ You also can control the volume of any single note by passing a 3rd (or 4th) arg
 mysong.append_note(SawSynth(Gs4, 2.5f, 0.5f)); // 0.5 volume, default value is 1.0
 ```
 
+Similarly, the attack and release can be adjusted per-note, however it will have to be done manually like so. The pre-set values are fine for most cases but can be adjusted if you want fade-ins and outs.
+```c++
+HarmonicSynth harmonic_synth = HarmonicSynth(C4, 2.f, 0.5);
+harmonic_synth.attack_time = 0.5f; // 0.5s fade-in
+harmonic_synth.release_time = 0.5f; //0.5s fade-out
+mysong.append_note(harmonic_synth);
+```
+
 Lastly, all notes can have a controlled "hold time" which can be useful for adding a small stop between 2 notes or letting a note have some form of decay (coming later). To add hold time, pass another argument into its constructor,
 ```c++
 mysong.add_note(SawSynth(A5, 0.2f, 0.19f, 1.0f));
