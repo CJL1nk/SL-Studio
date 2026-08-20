@@ -8,7 +8,7 @@ int main() {
 
     Audio audio = Audio("galaxy_collapse.wav");
 
-    SawSynth note = SawSynth(C4, 0.4f);
+    audio.append_note(SineSynth(C4, 2.f, 0.5f, 1.0f));
 
     for (int i = 0; i < 8; i++) {
         audio.append_note(HarmonicSynth(D4, 0.1f));

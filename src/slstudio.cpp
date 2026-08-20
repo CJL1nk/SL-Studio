@@ -17,11 +17,11 @@ float Distortion::apply(const float amplitude) const {
 
 // ----- NOTES -------------------------------------------------------------------------------------
 float SineSynth::calculate_amplitude(const float time) const {
-    if (time >= this->hold_time) { return 0.0f; } // Will fix this later
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
-    if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
+    else if (time > this->hold_time) { attack_multiplier = 0.0f; }
+    else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
 
     float amplitude = 0.15f * this->volume * attack_multiplier;
     return amplitude * sinf(time * this->note_freq * 2.0f * M_PI);
@@ -32,7 +32,8 @@ float SquareSynth::calculate_amplitude(const float time) const {
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
-    if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
+    else if (time > this->hold_time) { attack_multiplier = 0.0f; }
+    else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
 
     const float volume = this->volume * 0.065f * attack_multiplier;
     const float period = 1.0f / this->note_freq;
@@ -45,7 +46,8 @@ float SawSynth::calculate_amplitude(const float time) const {
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
-    if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
+    else if (time > this->hold_time) { attack_multiplier = 0.0f; }
+    else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
 
     const float period = 1.0f / this->note_freq;
     const float phase = fmodf(time, period) / period;  // 0 to 1 over one period
@@ -57,7 +59,8 @@ float HarmonicSynth::calculate_amplitude(const float time) const {
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
-    if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
+    else if (time > this->hold_time) { attack_multiplier = 0.0f; }
+    else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
     return
         ((1.00f * this->volume * attack_multiplier) * sinf(2.0f * M_PI * this->note_freq * time) +
         (0.5f * this->volume * attack_multiplier) * sinf(2.0f * M_PI * this->note_freq * 2 * time) +
