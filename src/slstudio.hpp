@@ -13,12 +13,20 @@
 
 // ----- EFFECTS -------------------------------------------------------------------------------------
 class Effect {
-
-};
-
-class Distortion : public Effect {
     public:
         float amount;
+
+        Effect(const float amount) : amount(amount){};
+        virtual ~Effect() = default;
+        [[nodiscard]] virtual float apply(float amplitude) const = 0;
+    };
+
+class Distortion final : public Effect {
+    public:
+        float amount;
+
+        Distortion(const float amount = 5.0f) : Effect(amount){};
+        [[nodiscard]] float apply(float amplitude) const override;
 };
 
 
@@ -30,37 +38,43 @@ class Note {
 
         float note_freq;
         float duration;
+        float hold_time = 0.f;
         float volume;
-        std::vector<Effect> effects;
+        std::vector<Effect*> effects;
 
-        Note(const float note_freq, const float duration) : note_freq(note_freq), duration(duration), volume(1.f){};
-        Note(const float note_freq, const float duration, const float volume) : note_freq(note_freq), duration(duration), volume(volume){};
+        Note(const float note_freq, const float duration) : note_freq(note_freq), duration(duration), hold_time(duration), volume(1.f){};
+        Note(const float note_freq, const float duration, const float volume) : note_freq(note_freq), duration(duration), hold_time(duration), volume(volume){};
+        Note(const float note_freq, const float duration, const float hold_time, const float volume) : note_freq(note_freq), duration(duration), hold_time(hold_time), volume(volume){};
 
-        [[nodiscard]] virtual float calculate_amplitude(float note_freq, float time) const = 0;
+        [[nodiscard]] virtual float calculate_amplitude(float note_freq, float time, float hold_time) const = 0;
 };
 
 class SineSynth final : public Note {
     public:
         SineSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
-        [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
+        SineSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
+        [[nodiscard]] float calculate_amplitude(float note_freq, float time, float hold_time) const override;
 };
 
 class SquareSynth final : public Note {
     public:
         SquareSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
-        [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
+        SquareSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
+        [[nodiscard]] float calculate_amplitude(float note_freq, float time, float hold_time) const override;
 };
 
 class SawSynth final : public Note {
     public:
         SawSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
-        [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
+        SawSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
+        [[nodiscard]] float calculate_amplitude(float note_freq, float time, float hold_time) const override;
 };
 
 class HarmonicSynth final : public Note {
     public:
         HarmonicSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
-        [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
+        HarmonicSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
+        [[nodiscard]] float calculate_amplitude(float note_freq, float time, float hold_time) const override;
 };
 
 
@@ -81,6 +95,7 @@ class Audio {
         void append_chord(const Chord& chord);
         void add_chord(const Chord& chord, float timestamp);
 
+        [[nodiscard]] float get_current_duration() const { return this->DURATION; }
         bool save();
 
     private:

@@ -8,6 +8,8 @@ int main() {
 
     Audio audio = Audio("galaxy_collapse.wav");
 
+    SawSynth note = SawSynth(C4, 0.4f);
+
     for (int i = 0; i < 8; i++) {
         audio.append_note(HarmonicSynth(D4, 0.1f));
         audio.append_note(HarmonicSynth(G4, 0.1f));
@@ -81,24 +83,61 @@ int main() {
     }));
 
     audio.append_chord(Chord({
-        new SawSynth(D6, 0.4f),
+        new SawSynth(D6, 0.4f, 0.8f),
         new SawSynth(A5, 0.4f),
         new SawSynth(D5, 0.4f),
     }));
 
     audio.append_chord(Chord({
-        new SawSynth(E6, 0.4f),
+        new SawSynth(E6, 0.4f, 0.8f),
         new SawSynth(A5, 0.4f),
         new SawSynth(E5, 0.4f),
     }));
 
     audio.append_chord(Chord({
-        new SawSynth(F6, 1.2f),
-        new SawSynth(As5, 1.2f),
-        new SawSynth(F5, 1.2f),
+        new SawSynth(F6, 0.8f, 0.8f),
+        new SawSynth(As5, 0.8f),
+        new SawSynth(F5, 0.8f),
     }));
 
-    audio.add_note(SquareSynth(D3, 6.f, 0.5f), 17.8);
+
+    audio.append_note(SawSynth(F6, 0.2f));
+    audio.append_note(SawSynth(E6, 0.2f));
+    audio.append_note(SawSynth(C6, 0.2f));
+    audio.append_note(SawSynth(A5, 0.2f, 0.19f, 1.0f));
+    audio.append_note(SawSynth(A5, 0.4f));
+
+
+    audio.append_note(SawSynth(C6, 0.125f));
+    audio.append_note(SawSynth(A5, 0.125f));
+    audio.append_note(SawSynth(C6, 0.125f));
+    audio.append_note(SawSynth(A5, 0.45f));
+
+    audio.append_note(SawSynth(F5, 0.2f));
+    audio.append_note(SawSynth(E5, 0.2f));
+    audio.append_chord(Chord({
+        new SawSynth(G5, 0.6f),
+        new SawSynth(D5, 0.6f),
+    }));
+    audio.append_chord(Chord({
+        new SawSynth(A5, 0.6f),
+        new SawSynth(E5, 0.6f),
+    }));
+
+    audio.append_note(SawSynth(E5, 0.2f));
+    audio.append_note(SawSynth(F5, 0.2f));
+    audio.append_chord(Chord({
+        new SawSynth(D5, 0.4f),
+        new SawSynth(A4, 0.4f),
+    }));
+    audio.append_chord(Chord({
+        new SawSynth(C5, 0.4f),
+        new SawSynth(G4, 0.4f),
+    }));
+    audio.append_chord(Chord({
+        new SawSynth(A4, 0.6),
+        new SawSynth(E4, 0.6f),
+    }));
 
     audio.save();
 

@@ -1,6 +1,6 @@
 # SL Studio
 
-BPM? Bars? Eighth notes? Must have been a crazy dream bro, come on let's go place a note at 0:45:590
+Time signatures? Bars? Eighth notes? Must have been a crazy dream bro, come on let's go place a note at 0:45:590
 
 ## Usage
 
@@ -45,10 +45,17 @@ mysong.add_note(SawSynth(Gs4, 2.5f), 10.f);
 
 The add_note() function takes two arguments: the note, and the timestamp. The note will be placed at the specified timestamp in your song, stacking the note on top of any other note(s) there. This is one method to create a chord, however, not the preferred method.
 
-Lastly, you can control the volume of any single note by passing a 3rd argument into its constructor.
+You also can control the volume of any single note by passing a 3rd (or 4th) argument into its constructor.
 ```c++
 mysong.append_note(SawSynth(Gs4, 2.5f, 0.5f)); // 0.5 volume, default value is 1.0
 ```
+
+Lastly, all notes can have a controlled "hold time" which can be useful for adding a small stop between 2 notes or letting a note have some form of decay (coming later). To add hold time, pass another argument into its constructor,
+```c++
+mysong.add_note(SawSynth(A5, 0.2f, 0.19f, 1.0f));
+// Note lasts for 0.2 seconds and has a 0.19 second hold time, leaving a 0.01 span of silence perfect for appending another note with the same frequency.
+```
+When this is done, ensure you add the 4th volume argument, otherwise the hold time will be interpreted as the volume.
 
 ### Chords
 
@@ -77,3 +84,5 @@ This will place a chord 3.5 seconds into the song.
 - Support stereo audio
 - MIDI import support
 - Support more file format exports
+- Add effects
+- Add more instruments

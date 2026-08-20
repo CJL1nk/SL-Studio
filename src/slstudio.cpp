@@ -9,25 +9,34 @@
 
 #define HEADER_SIZE 44
 
+// ----- EFFECTS -------------------------------------------------------------------------------------
+float Distortion::apply(const float amplitude) const {
+    return fmaxf(-1.0f, fminf(1.0f, amplitude * this->amount));
+}
+
 // ----- NOTES -------------------------------------------------------------------------------------
-float SineSynth::calculate_amplitude(const float note_freq, const float time) const {
+float SineSynth::calculate_amplitude(const float note_freq, const float time, const float hold_time) const {
+    if (time >= hold_time) { return 0.0f; }
     return (0.15f * this->volume) * sinf(time * note_freq * 2.0f * M_PI);
 }
 
-float SquareSynth::calculate_amplitude(const float note_freq, const float time) const {
+float SquareSynth::calculate_amplitude(const float note_freq, const float time, const float hold_time) const {
+    if (time >= hold_time) { return 0.0f; }
     const float volume = this->volume * 0.065f;
     const float period = 1.0f / note_freq;
     const float phase = fmodf(time, period) / period;
     return (phase < 0.5f) ? volume : -volume;
 }
 
-float SawSynth::calculate_amplitude(const float note_freq, const float time) const {
+float SawSynth::calculate_amplitude(const float note_freq, const float time, const float hold_time) const {
+    if (time >= hold_time) { return 0.0f; }
     const float period = 1.0f / note_freq;
     const float phase = fmodf(time, period) / period;  // 0 to 1 over one period
     return (0.08f * this->volume) * (2.0f * phase - 1.0f);  // -1 to +1
 }
 
-float HarmonicSynth::calculate_amplitude(const float note_freq, const float time) const {
+float HarmonicSynth::calculate_amplitude(const float note_freq, const float time, const float hold_time) const {
+    if (time >= hold_time) { return 0.0f; }
     return
         ((1.00f * this->volume) * sinf(2.0f * M_PI * note_freq * time) +
         (0.5f * this->volume) * sinf(2.0f * M_PI * note_freq * 2 * time) +
@@ -59,7 +68,7 @@ void Audio::append_note(const Note& note) {
 
     for (int i = 0; i < num_samples; i++) {
         const float time = (float)i / (float)this->SAMPLE_RATE; // Quantum of time sample represents
-        const float amplitude = note.calculate_amplitude(note.note_freq, time);
+        const float amplitude = note.calculate_amplitude(note.note_freq, time, note.hold_time);
 
         this->amplitudes[start_index + i] = amplitude;
     }
@@ -76,7 +85,7 @@ void Audio::add_note(const Note& note, const float timestamp) {
     for (int i = 0; i < num_samples; i++) {
         const float time = (float)i / (float)this->SAMPLE_RATE; // Quantum of time sample represents
         float cur_amplitude = this->amplitudes[start_index + i];
-        cur_amplitude += note.calculate_amplitude(note.note_freq, time);
+        cur_amplitude += note.calculate_amplitude(note.note_freq, time, note.hold_time);
 
         this->amplitudes[start_index + i] = cur_amplitude;
     }
@@ -104,7 +113,7 @@ void Audio::append_chord(const Chord& chord) {
 
         for (int j = 0; j < curr_duration; j++) {
             const float time = (float)j / (float)this->SAMPLE_RATE; // Quantum of time sample represents
-            const float amplitude = note.calculate_amplitude(note.note_freq, time);
+            const float amplitude = note.calculate_amplitude(note.note_freq, time, note.hold_time);
 
             float curr_amplitude = this->amplitudes[start_index + j];
             this->amplitudes[start_index + j] = curr_amplitude + amplitude;
@@ -136,7 +145,7 @@ void Audio::add_chord(const Chord& chord, const float timestamp) {
 
         for (int j = 0; j < curr_duration; j++) {
             const float time = (float)j / (float)this->SAMPLE_RATE; // Quantum of time sample represents
-            const float amplitude = note.calculate_amplitude(note.note_freq, time);
+            const float amplitude = note.calculate_amplitude(note.note_freq, time, note.hold_time);
 
             float curr_amplitude = this->amplitudes[start_index + j];
             this->amplitudes[start_index + j] = curr_amplitude + amplitude;
