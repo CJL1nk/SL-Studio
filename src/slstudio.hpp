@@ -60,7 +60,7 @@ class SineSynth final : public Note {
 
 class SquareSynth final : public Note {
     public:
-        SquareSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){ attack_time = 0.002f; release_time = 0.002f;};
+        SquareSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){ attack_time = 0.003f; release_time = 0.003f;};
         SquareSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
         [[nodiscard]] float calculate_amplitude(float time) const override;
 };

@@ -28,7 +28,6 @@ float SineSynth::calculate_amplitude(const float time) const {
 }
 
 float SquareSynth::calculate_amplitude(const float time) const {
-    if (time >= this->hold_time) { return 0.0f; } // Will fix this later
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
@@ -42,7 +41,6 @@ float SquareSynth::calculate_amplitude(const float time) const {
 }
 
 float SawSynth::calculate_amplitude(const float time) const {
-    if (time >= this->hold_time) { return 0.0f; } // Will fix this later
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
@@ -55,7 +53,6 @@ float SawSynth::calculate_amplitude(const float time) const {
 }
 
 float HarmonicSynth::calculate_amplitude(const float time) const {
-    if (time >= this->hold_time) { return 0.0f; } // Will fix this later
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
