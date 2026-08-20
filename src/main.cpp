@@ -104,7 +104,7 @@ int main() {
     audio.append_note(SawSynth(F6, 0.2f));
     audio.append_note(SawSynth(E6, 0.2f));
     audio.append_note(SawSynth(C6, 0.2f));
-    audio.append_note(SawSynth(A5, 0.2f, 0.19f, 1.0f));
+    audio.append_note(SawSynth(A5, 0.2f, 0.195f, 1.0f));
     audio.append_note(SawSynth(A5, 0.4f));
 
 
