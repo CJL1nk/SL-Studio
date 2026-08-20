@@ -38,6 +38,8 @@ int main() {
         new SquareSynth(C4, 4.f)
     }), 14.8f);
 
+    audio.add_note(HarmonicSynth(E5, 3.f), 1.f);
+
     audio.save();
 
     return 0;

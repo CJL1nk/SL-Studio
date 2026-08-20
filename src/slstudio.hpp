@@ -45,13 +45,13 @@ class SineSynth final : public Note {
         [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
 };
 
-class SquareSynth : public Note {
+class SquareSynth final : public Note {
     public:
         SquareSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
         [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
 };
 
-class HarmonicSynth : public Note {
+class HarmonicSynth final : public Note {
     public:
         HarmonicSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
         [[nodiscard]] float calculate_amplitude(float note_freq, float time) const override;
@@ -61,14 +61,14 @@ class HarmonicSynth : public Note {
 class Chord {
     public:
         std::vector<Note*> notes;
-        Chord(std::vector<Note*> notes) : notes(notes){};
+        explicit Chord(const std::vector<Note*> &notes) : notes(notes){};
 };
 
 // ----- AUDIO STUFF --------------------------------------------------------------------------------
 class Audio {
 
     public:
-        Audio(const char* filename);
+        explicit Audio(const char* filename);
 
         void append_note(const Note& note);
         void add_note(const Note& note, float timestamp);
