@@ -6,28 +6,64 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
+#include <random>
 
 #define HEADER_SIZE 44
 
 // ----- EFFECTS -------------------------------------------------------------------------------------
-float Distortion::apply(const float amplitude) const {
-    return fmaxf(-1.0f, fminf(1.0f, amplitude * this->amount));
+float Distortion::frequencyModulation(const float note_freq, const float time) const {
+    return note_freq;
+}
+
+float Distortion::apply(const float amplitude, const float time) const {
+    return amplitude;
+}
+
+float Vibrato::frequencyModulation(const float note_freq, const float time) const {
+    return note_freq + this->depth * sinf(2.0f * M_PI * this->speed * time);
+}
+
+float Vibrato::apply(const float amplitude, const float time) const {
+    return amplitude;
 }
 
 
 // ----- NOTES -------------------------------------------------------------------------------------
-float SineSynth::calculate_amplitude(const float time) const {
+float SineSynth::calculate_amplitude(const float time, const float dt) const {
+
+    // Frequency modulation for effects that use it
+    float frequency = this->note_freq;
+    for (int i = 0; i < this->effects.size(); i++) {
+        frequency = this->effects[i]->frequencyModulation(this->note_freq, time);
+        std::cout << "Frequency: " << frequency << std::endl;
+    }
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
     else if (time > this->hold_time) { attack_multiplier = 0.0f; }
     else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
 
+    this->phase += frequency * 2.0f * M_PI * dt;
+    if (this->phase >= 2.0f * M_PI) this->phase -= 2.0f * M_PI;
+
     float amplitude = 0.15f * this->volume * attack_multiplier;
-    return amplitude * sinf(time * this->note_freq * 2.0f * M_PI);
+    amplitude *= sinf(this->phase);
+
+    // Post-processing
+    for (int i = 0; i < this->effects.size(); i++) {
+        amplitude = this->effects[i]->apply(amplitude, time);
+    }
+
+    return amplitude;
 }
 
-float SquareSynth::calculate_amplitude(const float time) const {
+float SquareSynth::calculate_amplitude(const float time, const float dt) const {
+
+    // Frequency modulation for effects that use it
+    float frequency = this->note_freq;
+    for (int i = 0; i < this->effects.size(); i++) {
+        frequency = this->effects[i]->frequencyModulation(this->note_freq, time);
+    }
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
@@ -35,34 +71,72 @@ float SquareSynth::calculate_amplitude(const float time) const {
     else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
 
     const float volume = this->volume * 0.065f * attack_multiplier;
-    const float period = 1.0f / this->note_freq;
-    const float phase = fmodf(time, period) / period;
-    return (phase < 0.5f) ? volume : -volume;
+    this->phase += frequency * dt;
+    this->phase -= floorf(this->phase);
+
+    // Post-processing
+    float amplitude = (this->phase < 0.5f) ? volume : -volume;
+    for (int i = 0; i < this->effects.size(); i++) {
+        amplitude = this->effects[i]->apply(amplitude, time);
+    }
+
+    return amplitude;
 }
 
-float SawSynth::calculate_amplitude(const float time) const {
+float SawSynth::calculate_amplitude(const float time, const float dt) const {
+
+    // Frequency modulation for effects that use it
+    float frequency = this->note_freq;
+    for (int i = 0; i < this->effects.size(); i++) {
+        frequency = this->effects[i]->frequencyModulation(this->note_freq, time);
+    }
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
     else if (time > this->hold_time) { attack_multiplier = 0.0f; }
     else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
 
-    const float period = 1.0f / this->note_freq;
-    const float phase = fmodf(time, period) / period;  // 0 to 1 over one period
-    return (0.08f * this->volume * attack_multiplier) * (2.0f * phase - 1.0f);  // -1 to +1
+    const float volume = (0.08f * this->volume * attack_multiplier);
+    this->phase += frequency * dt;
+    this->phase -= floorf(this->phase);
+
+    // Post-processing
+    float amplitude = volume * (2.0f * this->phase - 1.0f);
+    for (int i = 0; i < this->effects.size(); i++) {
+        amplitude = this->effects[i]->apply(amplitude, time);
+    }
+    return amplitude;
 }
 
-float HarmonicSynth::calculate_amplitude(const float time) const {
+float HarmonicSynth::calculate_amplitude(const float time, const float dt) const {
+
+    // Frequency modulation for effects that use it
+    float frequency = this->note_freq;
+    for (int i = 0; i < this->effects.size(); i++) {
+        frequency = this->effects[i]->frequencyModulation(this->note_freq, time);
+    }
 
     float attack_multiplier = 1.0f;
     if (time < this->attack_time) { attack_multiplier = time / this->attack_time; }
     else if (time > this->hold_time) { attack_multiplier = 0.0f; }
     else if (time > this->hold_time - this->release_time) { attack_multiplier = (this->hold_time - time) / this->release_time; }
-    return
-        ((1.00f * this->volume * attack_multiplier) * sinf(2.0f * M_PI * this->note_freq * time) +
-        (0.5f * this->volume * attack_multiplier) * sinf(2.0f * M_PI * this->note_freq * 2 * time) +
-        (0.3f * this->volume * attack_multiplier) * sinf(2.0f * M_PI * this->note_freq * 3 * time) +
-        (0.15f * this->volume * attack_multiplier) * sinf(2.0f * M_PI * this->note_freq * 4 * time)) / 10;
+
+    this->phase1 += 2.0f * M_PI * frequency * 1.0f * dt;
+    this->phase2 += 2.0f * M_PI * frequency * 2.0f * dt;
+    this->phase3 += 2.0f * M_PI * frequency * 3.0f * dt;
+    this->phase4 += 2.0f * M_PI * frequency * 4.0f * dt;
+
+    float amplitude =
+            ((1.00f * this->volume * attack_multiplier) * sinf(this->phase1) +
+            (0.5f  * this->volume * attack_multiplier) * sinf(this->phase2) +
+            (0.3f  * this->volume * attack_multiplier) * sinf(this->phase3) +
+            (0.15f * this->volume * attack_multiplier) * sinf(this->phase4)) / 10;
+
+    // Post-processing
+    for (int i = 0; i < this->effects.size(); i++) {
+        amplitude = this->effects[i]->apply(amplitude, time);
+    }
+    return amplitude;
 }
 
 
@@ -89,7 +163,8 @@ void Audio::append_note(const Note& note) {
 
     for (int i = 0; i < num_samples; i++) {
         const float time = (float)i / (float)this->SAMPLE_RATE; // Quantum of time sample represents
-        const float amplitude = note.calculate_amplitude(time);
+        const float dt = 1.0f / (float)this->SAMPLE_RATE;
+        const float amplitude = note.calculate_amplitude(time, dt);
 
         this->amplitudes[start_index + i] = amplitude;
     }
@@ -105,8 +180,9 @@ void Audio::add_note(const Note& note, const float timestamp) {
 
     for (int i = 0; i < num_samples; i++) {
         const float time = (float)i / (float)this->SAMPLE_RATE; // Quantum of time sample represents
+        const float dt = 1.0f / (float)this->SAMPLE_RATE;
         float cur_amplitude = this->amplitudes[start_index + i];
-        cur_amplitude += note.calculate_amplitude(time);
+        cur_amplitude += note.calculate_amplitude(time, dt);
 
         this->amplitudes[start_index + i] = cur_amplitude;
     }
@@ -134,7 +210,8 @@ void Audio::append_chord(const Chord& chord) {
 
         for (int j = 0; j < curr_duration; j++) {
             const float time = (float)j / (float)this->SAMPLE_RATE; // Quantum of time sample represents
-            const float amplitude = note.calculate_amplitude(time);
+            const float dt = 1.0f / (float)this->SAMPLE_RATE;
+            const float amplitude = note.calculate_amplitude(time, dt);
 
             float curr_amplitude = this->amplitudes[start_index + j];
             this->amplitudes[start_index + j] = curr_amplitude + amplitude;
@@ -166,7 +243,8 @@ void Audio::add_chord(const Chord& chord, const float timestamp) {
 
         for (int j = 0; j < curr_duration; j++) {
             const float time = (float)j / (float)this->SAMPLE_RATE; // Quantum of time sample represents
-            const float amplitude = note.calculate_amplitude(time);
+            const float dt = 1.0f / (float)this->SAMPLE_RATE;
+            const float amplitude = note.calculate_amplitude(time, dt);
 
             float curr_amplitude = this->amplitudes[start_index + j];
             this->amplitudes[start_index + j] = curr_amplitude + amplitude;

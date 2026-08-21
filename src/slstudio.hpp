@@ -14,22 +14,38 @@
 // ----- EFFECTS -------------------------------------------------------------------------------------
 class Effect {
     public:
-        float amount;
-
-        Effect(const float amount) : amount(amount){};
         virtual ~Effect() = default;
-        [[nodiscard]] virtual float apply(float amplitude) const = 0;
-    };
+        [[nodiscard]] virtual float frequencyModulation(float note_freq, float time) const = 0;
+        [[nodiscard]] virtual float apply(float amplitude, float time) const = 0;
+};
 
 class Distortion final : public Effect {
     public:
-        float amount;
+        float level;
 
-        Distortion(const float amount = 5.0f) : Effect(amount){};
-        [[nodiscard]] float apply(float amplitude) const override;
+        explicit Distortion(const float level = 0.5f) : level(level){};
+        [[nodiscard]] float frequencyModulation(float note_freq, float time) const override;
+        [[nodiscard]] float apply(float amplitude, float time) const override;
 };
 
+class Vibrato final : public Effect {
+    public:
+        float speed;
+        float depth;
 
+    Vibrato(const float speed, const float depth) : Effect(), speed(speed), depth(depth){};
+    [[nodiscard]] float frequencyModulation(float note_freq, float time) const override;
+    [[nodiscard]] float apply(float amplitude, float time) const override;
+};
+
+class Slide final : public Effect {
+    public:
+        int num_semitones;
+
+        Slide(const int num_semitones = 1) : Effect(){};
+        [[nodiscard]] float frequencyModulation(float note_freq, float time) const override;
+        [[nodiscard]] float apply(float amplitude, float time) const override;
+};
 
 // ----- NOTES -------------------------------------------------------------------------------------
 class Note {
@@ -40,6 +56,7 @@ class Note {
         float duration;
         float hold_time = 0.f;
         float volume;
+        mutable double phase = 0.0f;
         float attack_time = 0.005f;
         float release_time = 0.005f;
         std::vector<Effect*> effects;
@@ -48,35 +65,42 @@ class Note {
         Note(const float note_freq, const float duration, const float volume) : note_freq(note_freq), duration(duration), hold_time(duration), volume(volume){};
         Note(const float note_freq, const float duration, const float hold_time, const float volume) : note_freq(note_freq), duration(duration), hold_time(hold_time), volume(volume){};
 
-        [[nodiscard]] virtual float calculate_amplitude(float time) const = 0;
+        void add_effect(Effect* effect) { effects.push_back(effect); }
+
+        [[nodiscard]] virtual float calculate_amplitude(float time, float dt) const = 0;
 };
 
 class SineSynth final : public Note {
     public:
         SineSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
         SineSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
-        [[nodiscard]] float calculate_amplitude(float time) const override;
+        [[nodiscard]] float calculate_amplitude(float time, float dt) const override;
 };
 
 class SquareSynth final : public Note {
     public:
         SquareSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){ attack_time = 0.003f; release_time = 0.003f;};
         SquareSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){ attack_time = 0.003f; release_time = 0.003f; };
-        [[nodiscard]] float calculate_amplitude(float time) const override;
+        [[nodiscard]] float calculate_amplitude(float time, float dt) const override;
 };
 
 class SawSynth final : public Note {
     public:
         SawSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){ attack_time = 0.003f; release_time = 0.003f; };
         SawSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){attack_time = 0.003f; release_time = 0.003f; };
-        [[nodiscard]] float calculate_amplitude(float time) const override;
+        [[nodiscard]] float calculate_amplitude(float time, float dt) const override;
 };
 
 class HarmonicSynth final : public Note {
     public:
+        mutable double phase1 = 0.0f; // Jank but works
+        mutable double phase2 = 0.0f;
+        mutable double phase3 = 0.0f;
+        mutable double phase4 = 0.0f;
+
         HarmonicSynth(const float note_freq, const float duration, const float volume = 1.f) : Note(note_freq, duration, volume){};
         HarmonicSynth(const float note_freq, const float duration, const float hold_time, const float volume) : Note(note_freq, duration, hold_time, volume){};
-        [[nodiscard]] float calculate_amplitude(float time) const override;
+        [[nodiscard]] float calculate_amplitude(float time, float dt) const override;
 };
 
 

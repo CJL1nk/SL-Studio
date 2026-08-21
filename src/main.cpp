@@ -70,31 +70,31 @@ int main() {
 
     audio.append_chord(Chord({
         new SawSynth(A5, 0.4f),
-        new SawSynth(F5, 0.4f),
+        new SawSynth(F5, 0.4f, 0.7),
         new SawSynth(A4, 0.4f),
     }));
 
     audio.append_chord(Chord({
         new SawSynth(C6, 0.4f),
-        new SawSynth(G5, 0.4f),
+        new SawSynth(G5, 0.4f, 0.7),
         new SawSynth(C5, 0.4f),
     }));
 
     audio.append_chord(Chord({
         new SawSynth(D6, 0.4f, 0.8f),
-        new SawSynth(A5, 0.4f),
+        new SawSynth(A5, 0.4f, 0.7),
         new SawSynth(D5, 0.4f),
     }));
 
     audio.append_chord(Chord({
         new SawSynth(E6, 0.4f, 0.8f),
-        new SawSynth(A5, 0.4f),
+        new SawSynth(A5, 0.4f, 0.7),
         new SawSynth(E5, 0.4f),
     }));
 
     audio.append_chord(Chord({
         new SawSynth(F6, 0.8f, 0.8f),
-        new SawSynth(As5, 0.8f),
+        new SawSynth(As5, 0.8f, 0.7),
         new SawSynth(F5, 0.8f),
     }));
 
@@ -126,15 +126,15 @@ int main() {
     audio.append_note(SawSynth(F5, 0.2f));
     audio.append_chord(Chord({
         new SawSynth(D5, 0.4f),
-        new SawSynth(A4, 0.4f),
+        new SawSynth(A4, 0.4f, 0.5),
     }));
     audio.append_chord(Chord({
         new SawSynth(C5, 0.4f),
-        new SawSynth(G4, 0.4f),
+        new SawSynth(G4, 0.4f, 0.5),
     }));
     audio.append_chord(Chord({
         new SawSynth(A4, 0.6),
-        new SawSynth(E4, 0.6f),
+        new SawSynth(E4, 0.6f, 0.5),
     }));
 
     audio.save();

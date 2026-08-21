@@ -87,10 +87,32 @@ mysong.add_chord(Chord({
 ```
 This will place a chord 3.5 seconds into the song.
 
+
+### Effects
+
+To add some more variety on top of the sound of our notes, we can add some effects. Currently, there are:
+- Vibrato
+
+Effects are added to individual notes. The best way to add effects is to treat them like guitar pedals. To make an effect, simply do
+```c++
+Vibrato vibratoEffect1 = Vibrato(6.0, 20.0); // Speed and depth, respectively
+```
+Once this has been created, we can take some note and add the effect to it.
+```c++
+SquareSynth wobblyNote = SquareSynth(D5, 4.f);
+wobblyNote.add_effect(&vibratoEffect1); // This is where we add the effect
+mysong.append_note(wobblyNote);
+
+// If we wanted, we could add this effect to more notes as well.
+someOtherNote.add_effect(&vibratoEffect1);
+awesomeNote123.add_effect(&vibratoEffect1);
+```
+
+Effects can be stacked on top of each other, and will be processed in the order of which they're added. Arguments to each individual effect will vary, so be sure to read the parameter name.
+
 ## Todo:
 
 - Support stereo audio
 - MIDI import support
 - Support more file format exports
-- Add effects
 - Add more instruments
